@@ -1,0 +1,254 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "parakeet-worker-protocol",
+  "description": "NDJSON protocol schema for worker stdout events",
+  "type": "object",
+  "required": ["event", "timestamp"],
+  "properties": {
+    "event": { "type": "string" },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T.*Z$"
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/definitions/start" },
+    { "$ref": "#/definitions/manifest_loaded" },
+    { "$ref": "#/definitions/ffmpeg_status" },
+    { "$ref": "#/definitions/scanned" },
+    { "$ref": "#/definitions/models_loaded" },
+    { "$ref": "#/definitions/file_started" },
+    { "$ref": "#/definitions/file_progress" },
+    { "$ref": "#/definitions/file_retry" },
+    { "$ref": "#/definitions/file_done" },
+    { "$ref": "#/definitions/file_skipped" },
+    { "$ref": "#/definitions/file_failed" },
+    { "$ref": "#/definitions/report_written" },
+    { "$ref": "#/definitions/report_write_failed" },
+    { "$ref": "#/definitions/summary" },
+    { "$ref": "#/definitions/fatal_error" }
+  ],
+  "definitions": {
+    "start": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "start" },
+        "session_id": { "type": "string" },
+        "provider": { "type": "string" },
+        "model": { "type": "string" }
+      },
+      "required": ["event"],
+      "allOf": [
+        {
+          "anyOf": [
+            { "required": ["session_id", "provider", "model"] },
+            { "required": ["source_mode", "output_dir", "model_dir", "model_version"] }
+          ]
+        }
+      ],
+      "additionalProperties": true
+    },
+    "manifest_loaded": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "manifest_loaded" },
+        "session_id": { "type": "string" },
+        "total": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["event", "session_id", "total"],
+      "additionalProperties": true
+    },
+    "ffmpeg_status": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "ffmpeg_status" },
+        "requested": { "type": "boolean" },
+        "available": { "type": "boolean" }
+      },
+      "required": ["event", "requested", "available"],
+      "additionalProperties": true
+    },
+    "scanned": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "scanned" },
+        "total": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["event", "total"],
+      "additionalProperties": true
+    },
+    "models_loaded": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "models_loaded" }
+      },
+      "required": ["event"],
+      "additionalProperties": true
+    },
+    "file_started": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "file_started" },
+        "index": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 },
+        "file": { "type": "string" },
+        "relative": { "type": "string" }
+      },
+      "required": ["event", "index", "total", "file", "relative"],
+      "additionalProperties": true
+    },
+    "file_progress": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "file_progress" },
+        "index": { "type": "integer", "minimum": 0 },
+        "file": { "type": "string" },
+        "progress": { "type": "number", "minimum": 0, "maximum": 100 },
+        "rtfx": { "type": "number", "minimum": 0 }
+      },
+      "required": ["event", "index", "file", "progress", "rtfx"],
+      "additionalProperties": true
+    },
+    "file_retry": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "file_retry" },
+        "index": { "type": "integer", "minimum": 0 },
+        "file": { "type": "string" },
+        "reason": { "type": "string" }
+      },
+      "required": ["event", "index", "file", "reason"],
+      "additionalProperties": true
+    },
+    "file_done": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "file_done" },
+        "index": { "type": "integer", "minimum": 0 },
+        "file": { "type": "string" },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "processing_seconds": { "type": "number", "minimum": 0 },
+        "rtfx": { "type": "number", "minimum": 0 },
+        "confidence": { "type": "number", "minimum": 0 },
+        "output": {
+          "type": "object",
+          "properties": {
+            "txt": { "type": "string" },
+            "json": { "type": "string" }
+          },
+          "anyOf": [
+            { "required": ["txt"] },
+            { "required": ["json"] }
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "event",
+        "index",
+        "file",
+        "duration_seconds",
+        "processing_seconds",
+        "rtfx",
+        "confidence",
+        "output"
+      ],
+      "additionalProperties": true
+    },
+    "file_skipped": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "file_skipped" },
+        "index": { "type": "integer", "minimum": 0 },
+        "file": { "type": "string" },
+        "reason": { "type": "string" },
+        "output": {
+          "type": "object",
+          "properties": {
+            "txt": { "type": "string" },
+            "json": { "type": "string" }
+          },
+          "anyOf": [
+            { "required": ["txt"] },
+            { "required": ["json"] }
+          ],
+          "additionalProperties": true
+        }
+      },
+      "required": ["event", "index", "file", "reason"],
+      "additionalProperties": true
+    },
+    "file_failed": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "file_failed" },
+        "index": { "type": "integer", "minimum": 0 },
+        "file": { "type": "string" },
+        "error": { "type": "string" },
+        "attempts": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["event", "index", "file", "error", "attempts"],
+      "additionalProperties": true
+    },
+    "report_written": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "report_written" },
+        "report_path": { "type": "string" }
+      },
+      "required": ["event", "report_path"],
+      "additionalProperties": true
+    },
+    "report_write_failed": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "report_write_failed" },
+        "error": { "type": "string" }
+      },
+      "required": ["event", "error"],
+      "additionalProperties": true
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "summary" },
+        "total": { "type": "integer", "minimum": 0 },
+        "processed": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "failures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "file": { "type": "string" },
+              "error": { "type": "string" }
+            },
+            "required": ["file", "error"],
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "event",
+        "total",
+        "processed",
+        "skipped",
+        "failed",
+        "duration_seconds",
+        "failures"
+      ],
+      "additionalProperties": true
+    },
+    "fatal_error": {
+      "type": "object",
+      "properties": {
+        "event": { "const": "fatal_error" },
+        "error": { "type": "string" }
+      },
+      "required": ["event", "error"],
+      "additionalProperties": true
+    }
+  }
+}

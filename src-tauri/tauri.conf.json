@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Batch Transcriber",
+  "version": "0.1.0",
+  "identifier": "com.neno.parakeet-batch-transcriber",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build && npm run prepare:worker",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Batch Transcriber",
+        "width": 1120,
+        "height": 860,
+        "minWidth": 920,
+        "minHeight": 760
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": [
+      "resources/parakeet-batch",
+      "resources/parakeet-modelctl",
+      "resources/whisper-venv/**/*",
+      "resources/faster-whisper-venv/**/*"
+    ],
+    "fileAssociations": [
+      {
+        "ext": [
+          "mp3",
+          "wav",
+          "m4a",
+          "flac",
+          "ogg",
+          "aac",
+          "aiff",
+          "wma"
+        ],
+        "name": "Audio File",
+        "description": "Audio file for transcription",
+        "role": "Editor"
+      }
+    ],
+    "macOS": {
+      "entitlements": "Parakeet_Batch_Transcriber.entitlements"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

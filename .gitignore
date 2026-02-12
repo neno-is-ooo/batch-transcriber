@@ -1,0 +1,59 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+src-tauri/target
+swift-worker/.build
+src-tauri/resources/parakeet-batch
+src-tauri/resources/parakeet-modelctl
+src-tauri/resources/whisper-venv/
+src-tauri/resources/faster-whisper-venv/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+.venv/
+workers/*/.venv/
+workers/*/build/
+workers/*/*.egg-info/
+**/__pycache__/
+*.pyc
+.vscode
+# OS specific
+
+# Task files
+tasks.json
+tasks/ 
+
+# Local archives and release outputs
+_archive/
+
+# Planning / handoff / local agent artifacts
+.taskmaster/
+.tldr/
+handoff/
+prd-copied.txt
+tasks.md
+GEMINI.md

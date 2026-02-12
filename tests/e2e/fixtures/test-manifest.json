@@ -1,0 +1,11 @@
+{
+  "session_id": "e2e-session",
+  "provider": "whisper-openai",
+  "model": "base",
+  "files": [
+    {
+      "path": "tests/e2e/fixtures/test-audio-short.mp3",
+      "relative_path": "test-audio-short.mp3"
+    }
+  ]
+}
