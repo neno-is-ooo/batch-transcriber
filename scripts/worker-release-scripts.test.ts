@@ -171,7 +171,7 @@ describe("release-macos.sh", () => {
     const codesignLog = join(root, "codesign.log");
     const npmLog = join(root, "npm.log");
     const releaseStepLog = join(root, "release-step.log");
-    const entitlementsPath = join(root, "src-tauri", "Parakeet_Batch_Transcriber.entitlements");
+    const entitlementsPath = join(root, "src-tauri", "Batch_Transcriber.entitlements");
 
     mkdirSync(binDir, { recursive: true });
     mkdirSync(dirname(entitlementsPath), { recursive: true });
