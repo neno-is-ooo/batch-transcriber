@@ -550,9 +550,9 @@ mod tests {
         let manifest = SessionManifest {
             session_id: session_id.to_string(),
             created_at: "2026-02-12T00:00:00.000Z".to_string(),
-            provider: "parakeet-coreml".to_string(),
+            provider: "coreml-local".to_string(),
             model: "v3".to_string(),
-            output_dir: PathBuf::from("/tmp/parakeet-transcripts"),
+            output_dir: PathBuf::from("/tmp/batch-transcripts"),
             settings: fixture_settings(),
             files: vec![
                 FileEntry {
@@ -588,8 +588,8 @@ mod tests {
             "/audio/a.wav".to_string(),
             FileOutcome {
                 status: "success".to_string(),
-                transcript_path: Some("/tmp/parakeet-transcripts/a.txt".to_string()),
-                json_path: Some("/tmp/parakeet-transcripts/a.json".to_string()),
+                transcript_path: Some("/tmp/batch-transcripts/a.txt".to_string()),
+                json_path: Some("/tmp/batch-transcripts/a.json".to_string()),
                 error: None,
             },
         );
@@ -624,7 +624,7 @@ mod tests {
         assert_eq!(sessions.len(), 1);
         let session = &sessions[0];
         assert_eq!(session.id, "session-a");
-        assert_eq!(session.provider, "parakeet-coreml");
+        assert_eq!(session.provider, "coreml-local");
         assert_eq!(session.model, "v3");
         assert_eq!(session.total, 2);
         assert_eq!(session.processed, 1);

@@ -30,7 +30,7 @@ describe("useProviders", () => {
   });
 
   it("fetches providers on mount and clears loading", async () => {
-    const providers = [providerFactory("parakeet-coreml", true)];
+    const providers = [providerFactory("coreml-local", true)];
     getProvidersMock.mockResolvedValueOnce(providers);
 
     const { result } = renderHook(() => useProviders());
@@ -90,12 +90,12 @@ describe("useProviders", () => {
 
   it("filters and finds providers using helper functions", () => {
     const providers = [
-      providerFactory("parakeet-coreml", true),
+      providerFactory("coreml-local", true),
       providerFactory("whisper-openai", false),
     ];
 
     expect(getAvailableProviders(providers).map((provider) => provider.id)).toEqual([
-      "parakeet-coreml",
+      "coreml-local",
     ]);
     expect(getProviderById(providers, "whisper-openai")?.available).toBe(false);
     expect(getProviderById(providers, "missing")).toBeUndefined();

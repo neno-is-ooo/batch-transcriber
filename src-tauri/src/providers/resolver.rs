@@ -1,6 +1,6 @@
 use super::registry::{
-    check_available, ProviderRuntime, FASTER_WHISPER_PROVIDER_ID, PARAKEET_COREML_PROVIDER_ID,
-    SWIFT_TOOL_NAME, WHISPER_OPENAI_PROVIDER_ID,
+    check_available, normalize_provider_id, ProviderRuntime, FASTER_WHISPER_PROVIDER_ID,
+    COREML_PROVIDER_ID, SWIFT_TOOL_NAME, WHISPER_OPENAI_PROVIDER_ID,
 };
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -42,8 +42,8 @@ impl Display for ProviderError {
 
 impl Error for ProviderError {}
 
-const PARAKEET_V3_FOLDER: &str = "parakeet-tdt-0.6b-v3-coreml";
-const PARAKEET_V2_FOLDER: &str = "parakeet-tdt-0.6b-v2-coreml";
+const COREML_V3_FOLDER: &str = "parakeet-tdt-0.6b-v3-coreml";
+const COREML_V2_FOLDER: &str = "parakeet-tdt-0.6b-v2-coreml";
 
 fn default_models_root() -> PathBuf {
     crate::fluid_models_root().unwrap_or_else(|_| {
@@ -77,11 +77,11 @@ fn validate_model(model: &str) -> Result<&str, ProviderError> {
     Ok(trimmed)
 }
 
-fn resolve_parakeet_model_dir(models_root: &std::path::Path, model: &str) -> PathBuf {
+fn resolve_coreml_model_dir(models_root: &std::path::Path, model: &str) -> PathBuf {
     let normalized = model.trim().to_ascii_lowercase();
     let folder = match normalized.as_str() {
-        "v3" | PARAKEET_V3_FOLDER => PARAKEET_V3_FOLDER,
-        "v2" | PARAKEET_V2_FOLDER => PARAKEET_V2_FOLDER,
+        "v3" | COREML_V3_FOLDER => COREML_V3_FOLDER,
+        "v2" | COREML_V2_FOLDER => COREML_V2_FOLDER,
         _ => model,
     };
 
@@ -93,6 +93,7 @@ pub fn resolve_provider(
     model: &str,
     settings: &ProviderSettings,
 ) -> Result<ProviderRuntime, ProviderError> {
+    let normalized_id = normalize_provider_id(id);
     let validated_model = validate_model(model)?;
     let models_root = settings
         .models_root_override
@@ -103,10 +104,10 @@ pub fn resolve_provider(
         .clone()
         .unwrap_or_else(default_swift_binary_path);
 
-    let runtime = match id {
-        PARAKEET_COREML_PROVIDER_ID => ProviderRuntime::SwiftNative {
+    let runtime = match normalized_id {
+        COREML_PROVIDER_ID => ProviderRuntime::SwiftNative {
             binary_path: swift_binary,
-            model_dir: resolve_parakeet_model_dir(&models_root, validated_model),
+            model_dir: resolve_coreml_model_dir(&models_root, validated_model),
         },
         WHISPER_OPENAI_PROVIDER_ID => ProviderRuntime::PythonUv {
             package: "whisper-batch".to_string(),
@@ -133,20 +134,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn resolves_parakeet_runtime_with_model_directory() {
+    fn resolves_coreml_runtime_with_model_directory() {
         let settings = ProviderSettings {
-            swift_binary_override: Some(PathBuf::from("/tmp/swift/parakeet-batch")),
+            swift_binary_override: Some(PathBuf::from("/tmp/swift/coreml-batch")),
             models_root_override: Some(PathBuf::from("/tmp/models")),
             check_availability: false,
         };
 
-        let runtime = resolve_provider(PARAKEET_COREML_PROVIDER_ID, "v3", &settings)
+        let runtime = resolve_provider(COREML_PROVIDER_ID, "v3", &settings)
             .expect("provider should resolve");
 
         assert_eq!(
             runtime,
             ProviderRuntime::SwiftNative {
-                binary_path: PathBuf::from("/tmp/swift/parakeet-batch"),
+                binary_path: PathBuf::from("/tmp/swift/coreml-batch"),
                 model_dir: PathBuf::from("/tmp/models/parakeet-tdt-0.6b-v3-coreml"),
             }
         );
@@ -155,27 +156,27 @@ mod tests {
     #[test]
     fn maps_v2_and_v3_model_aliases_to_managed_folder_names() {
         let settings = ProviderSettings {
-            swift_binary_override: Some(PathBuf::from("/tmp/swift/parakeet-batch")),
+            swift_binary_override: Some(PathBuf::from("/tmp/swift/coreml-batch")),
             models_root_override: Some(PathBuf::from("/tmp/models")),
             check_availability: false,
         };
 
-        let v2_runtime = resolve_provider(PARAKEET_COREML_PROVIDER_ID, "v2", &settings)
+        let v2_runtime = resolve_provider(COREML_PROVIDER_ID, "v2", &settings)
             .expect("v2 alias should resolve");
-        let v3_runtime = resolve_provider(PARAKEET_COREML_PROVIDER_ID, "v3", &settings)
+        let v3_runtime = resolve_provider(COREML_PROVIDER_ID, "v3", &settings)
             .expect("v3 alias should resolve");
 
         assert_eq!(
             v2_runtime,
             ProviderRuntime::SwiftNative {
-                binary_path: PathBuf::from("/tmp/swift/parakeet-batch"),
+                binary_path: PathBuf::from("/tmp/swift/coreml-batch"),
                 model_dir: PathBuf::from("/tmp/models/parakeet-tdt-0.6b-v2-coreml"),
             }
         );
         assert_eq!(
             v3_runtime,
             ProviderRuntime::SwiftNative {
-                binary_path: PathBuf::from("/tmp/swift/parakeet-batch"),
+                binary_path: PathBuf::from("/tmp/swift/coreml-batch"),
                 model_dir: PathBuf::from("/tmp/models/parakeet-tdt-0.6b-v3-coreml"),
             }
         );
@@ -210,6 +211,26 @@ mod tests {
     }
 
     #[test]
+    fn resolves_legacy_coreml_provider_id_for_backward_compatibility() {
+        let settings = ProviderSettings {
+            swift_binary_override: Some(PathBuf::from("/tmp/swift/coreml-batch")),
+            models_root_override: Some(PathBuf::from("/tmp/models")),
+            check_availability: false,
+        };
+
+        let runtime = resolve_provider("parakeet-coreml", "v3", &settings)
+            .expect("legacy coreml provider id should resolve");
+
+        assert_eq!(
+            runtime,
+            ProviderRuntime::SwiftNative {
+                binary_path: PathBuf::from("/tmp/swift/coreml-batch"),
+                model_dir: PathBuf::from("/tmp/models/parakeet-tdt-0.6b-v3-coreml"),
+            }
+        );
+    }
+
+    #[test]
     fn returns_not_found_for_unknown_provider_id() {
         let settings = ProviderSettings {
             check_availability: false,
@@ -232,7 +253,7 @@ mod tests {
             ..ProviderSettings::default()
         };
 
-        let error = resolve_provider(PARAKEET_COREML_PROVIDER_ID, "../escape", &settings)
+        let error = resolve_provider(COREML_PROVIDER_ID, "../escape", &settings)
             .expect_err("path traversal model should be rejected");
 
         assert_eq!(error, ProviderError::InvalidModel("../escape".to_string()));
@@ -241,17 +262,17 @@ mod tests {
     #[test]
     fn returns_unavailable_when_runtime_is_not_available() {
         let settings = ProviderSettings {
-            swift_binary_override: Some(PathBuf::from("/tmp/not-present/parakeet-batch")),
+            swift_binary_override: Some(PathBuf::from("/tmp/not-present/coreml-batch")),
             models_root_override: Some(PathBuf::from("/tmp/models")),
             check_availability: true,
         };
 
-        let error = resolve_provider(PARAKEET_COREML_PROVIDER_ID, "v3", &settings)
+        let error = resolve_provider(COREML_PROVIDER_ID, "v3", &settings)
             .expect_err("missing runtime should be marked unavailable");
 
         assert_eq!(
             error,
-            ProviderError::Unavailable(PARAKEET_COREML_PROVIDER_ID.to_string())
+            ProviderError::Unavailable(COREML_PROVIDER_ID.to_string())
         );
     }
 }

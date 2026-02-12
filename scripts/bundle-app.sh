@@ -43,8 +43,8 @@ copy_venv() {
 
 mkdir -p "$RESOURCES_DIR"
 
-copy_binary "$SWIFT_WORKER_DIR/parakeet-batch" "$RESOURCES_DIR/parakeet-batch"
-copy_binary "$SWIFT_WORKER_DIR/parakeet-modelctl" "$RESOURCES_DIR/parakeet-modelctl"
+copy_binary "$SWIFT_WORKER_DIR/coreml-batch" "$RESOURCES_DIR/coreml-batch"
+copy_binary "$SWIFT_WORKER_DIR/coreml-modelctl" "$RESOURCES_DIR/coreml-modelctl"
 
 copy_venv "$ROOT_DIR/workers/whisper-batch/.venv" "$RESOURCES_DIR/whisper-venv" "whisper venv"
 copy_venv "$ROOT_DIR/workers/faster-whisper-batch/.venv" "$RESOURCES_DIR/faster-whisper-venv" "faster-whisper venv"

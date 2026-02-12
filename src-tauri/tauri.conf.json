@@ -28,8 +28,8 @@
     "active": true,
     "targets": "all",
     "resources": [
-      "resources/parakeet-batch",
-      "resources/parakeet-modelctl",
+      "resources/coreml-batch",
+      "resources/coreml-modelctl",
       "resources/whisper-venv/**/*",
       "resources/faster-whisper-venv/**/*"
     ],

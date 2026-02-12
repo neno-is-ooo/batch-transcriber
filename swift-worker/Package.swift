@@ -2,18 +2,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "parakeet-batch-worker",
+    name: "coreml-batch-worker",
     platforms: [
         .macOS(.v14)
     ],
     products: [
         .executable(
-            name: "parakeet-batch",
-            targets: ["parakeet-batch"]
+            name: "coreml-batch",
+            targets: ["coreml-batch"]
         ),
         .executable(
-            name: "parakeet-modelctl",
-            targets: ["parakeet-modelctl"]
+            name: "coreml-modelctl",
+            targets: ["coreml-modelctl"]
         )
     ],
     dependencies: [
@@ -21,19 +21,19 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "parakeet-batch",
+            name: "coreml-batch",
             dependencies: [
                 .product(name: "FluidAudio", package: "FluidAudio")
             ]
         ),
         .executableTarget(
-            name: "parakeet-modelctl",
+            name: "coreml-modelctl",
             dependencies: [
                 .product(name: "FluidAudio", package: "FluidAudio")
             ]
         ),
         .testTarget(
-            name: "parakeet-batchTests"
+            name: "coreml-batchTests"
         )
     ]
 )

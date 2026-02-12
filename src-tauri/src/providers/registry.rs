@@ -7,10 +7,14 @@ use std::thread;
 use std::time::{Duration, Instant};
 use tauri::AppHandle;
 
-pub const PARAKEET_COREML_PROVIDER_ID: &str = "parakeet-coreml";
+pub const COREML_PROVIDER_ID: &str = "coreml-local";
+pub const LEGACY_COREML_PROVIDER_ID: &str = "parakeet-coreml";
 pub const WHISPER_OPENAI_PROVIDER_ID: &str = "whisper-openai";
 pub const FASTER_WHISPER_PROVIDER_ID: &str = "faster-whisper";
-pub const SWIFT_TOOL_NAME: &str = "parakeet-batch";
+pub const SWIFT_TOOL_NAME: &str = "coreml-batch";
+pub const LEGACY_SWIFT_TOOL_NAME: &str = "parakeet-batch";
+pub const SWIFT_MODELCTL_TOOL_NAME: &str = "coreml-modelctl";
+pub const LEGACY_SWIFT_MODELCTL_TOOL_NAME: &str = "parakeet-modelctl";
 
 const CAPABILITY_TIMEOUT: Duration = Duration::from_secs(5);
 const UV_INSTALL_URL: &str = "https://docs.astral.sh/uv/getting-started/installation/";
@@ -274,36 +278,63 @@ fn default_local_swift_binary_path() -> PathBuf {
         .unwrap_or_else(|_| PathBuf::from("swift-worker/.build/release").join(SWIFT_TOOL_NAME))
 }
 
-fn select_swift_binary_path(bundled_path: &Path, local_path: &Path) -> PathBuf {
-    let local_usable = binary_supports_capabilities(local_path);
-    if local_usable {
-        return local_path.to_path_buf();
-    }
+fn legacy_local_swift_binary_path() -> PathBuf {
+    crate::local_tool_binary_path(LEGACY_SWIFT_TOOL_NAME).unwrap_or_else(|_| {
+        PathBuf::from("swift-worker/.build/release").join(LEGACY_SWIFT_TOOL_NAME)
+    })
+}
 
-    let bundled_usable = binary_supports_capabilities(bundled_path);
-    if bundled_usable {
-        return bundled_path.to_path_buf();
-    }
+fn select_first_capable(candidates: &[PathBuf]) -> Option<PathBuf> {
+    candidates
+        .iter()
+        .find(|candidate| binary_supports_capabilities(candidate))
+        .cloned()
+}
 
-    if local_path.exists() {
-        return local_path.to_path_buf();
-    }
+fn select_first_existing(candidates: &[PathBuf]) -> Option<PathBuf> {
+    candidates.iter().find(|candidate| candidate.exists()).cloned()
+}
 
-    if bundled_path.exists() {
-        return bundled_path.to_path_buf();
-    }
+fn bundled_swift_binary_candidates(app: &AppHandle) -> Vec<PathBuf> {
+    [SWIFT_TOOL_NAME, LEGACY_SWIFT_TOOL_NAME]
+        .iter()
+        .filter_map(|tool| crate::bundled_tool_binary_path(app, tool).ok())
+        .collect()
+}
 
-    local_path.to_path_buf()
+fn local_swift_binary_candidates() -> Vec<PathBuf> {
+    vec![default_local_swift_binary_path(), legacy_local_swift_binary_path()]
+}
+
+pub(crate) fn normalize_provider_id(id: &str) -> &str {
+    if id == LEGACY_COREML_PROVIDER_ID {
+        COREML_PROVIDER_ID
+    } else {
+        id
+    }
 }
 
 pub(crate) fn resolve_swift_binary_path(app: &AppHandle) -> PathBuf {
-    let local_path = default_local_swift_binary_path();
+    let local_candidates = local_swift_binary_candidates();
+    let bundled_candidates = bundled_swift_binary_candidates(app);
 
-    if let Ok(bundled_path) = crate::bundled_tool_binary_path(app, SWIFT_TOOL_NAME) {
-        return select_swift_binary_path(&bundled_path, &local_path);
+    if let Some(local) = select_first_capable(&local_candidates) {
+        return local;
     }
 
-    local_path
+    if let Some(bundled) = select_first_capable(&bundled_candidates) {
+        return bundled;
+    }
+
+    if let Some(local) = select_first_existing(&local_candidates) {
+        return local;
+    }
+
+    if let Some(bundled) = select_first_existing(&bundled_candidates) {
+        return bundled;
+    }
+
+    default_local_swift_binary_path()
 }
 
 fn install_instructions(runtime: &ProviderRuntime, uv_available: bool) -> String {
@@ -335,8 +366,8 @@ fn install_instructions(runtime: &ProviderRuntime, uv_available: bool) -> String
 fn known_providers(swift_binary_path: PathBuf, models_root: PathBuf) -> Vec<Provider> {
     vec![
         Provider {
-            id: PARAKEET_COREML_PROVIDER_ID.to_string(),
-            name: "Parakeet CoreML".to_string(),
+            id: COREML_PROVIDER_ID.to_string(),
+            name: "CoreML Local".to_string(),
             runtime: ProviderRuntime::SwiftNative {
                 binary_path: swift_binary_path,
                 model_dir: models_root,
@@ -486,26 +517,28 @@ mod tests {
     #[test]
     fn prefers_local_swift_binary_when_both_are_capable() {
         let root = unique_temp_path("bundled");
-        let bundled = root.join("Resources/parakeet-batch");
-        let local = root.join("swift-worker/.build/release/parakeet-batch");
+        let bundled = root.join("Resources/coreml-batch");
+        let local = root.join("swift-worker/.build/release/coreml-batch");
 
         write_test_binary(&bundled);
         write_test_binary(&local);
 
-        let selected = select_swift_binary_path(&bundled, &local);
+        let selected =
+            select_first_capable(&[local.clone(), bundled.clone()]).expect("capable binary");
         assert_eq!(selected, local);
     }
 
     #[test]
     fn prefers_local_swift_binary_when_bundled_is_legacy() {
         let root = unique_temp_path("bundled-legacy");
-        let bundled = root.join("Resources/parakeet-batch");
-        let local = root.join("swift-worker/.build/release/parakeet-batch");
+        let bundled = root.join("Resources/coreml-batch");
+        let local = root.join("swift-worker/.build/release/coreml-batch");
 
         write_legacy_test_binary(&bundled);
         write_test_binary(&local);
 
-        let selected = select_swift_binary_path(&bundled, &local);
+        let selected =
+            select_first_capable(&[local.clone(), bundled.clone()]).expect("capable binary");
         assert_eq!(selected, local);
     }
 
@@ -581,10 +614,10 @@ mod tests {
     #[test]
     fn probe_with_marks_unavailable_and_sets_install_instructions() {
         let missing_swift = Provider {
-            id: PARAKEET_COREML_PROVIDER_ID.to_string(),
-            name: "Parakeet CoreML".to_string(),
+            id: COREML_PROVIDER_ID.to_string(),
+            name: "CoreML Local".to_string(),
             runtime: ProviderRuntime::SwiftNative {
-                binary_path: PathBuf::from("/tmp/missing/parakeet-batch"),
+                binary_path: PathBuf::from("/tmp/missing/coreml-batch"),
                 model_dir: PathBuf::from("/tmp/models"),
             },
             available: true,
@@ -606,12 +639,12 @@ mod tests {
 
     #[test]
     fn probe_with_fetches_capabilities_for_available_provider() {
-        let executable = unique_temp_path("swift-runtime").join("parakeet-batch");
+        let executable = unique_temp_path("swift-runtime").join("coreml-batch");
         write_test_binary(&executable);
 
         let provider = Provider {
-            id: PARAKEET_COREML_PROVIDER_ID.to_string(),
-            name: "Parakeet CoreML".to_string(),
+            id: COREML_PROVIDER_ID.to_string(),
+            name: "CoreML Local".to_string(),
             runtime: ProviderRuntime::SwiftNative {
                 binary_path: executable,
                 model_dir: PathBuf::from("/tmp/models"),
@@ -639,5 +672,11 @@ mod tests {
         assert!(probed[0].available);
         assert_eq!(probed[0].capabilities, Some(expected_caps));
         assert!(probed[0].install_instructions.is_none());
+    }
+
+    #[test]
+    fn normalize_provider_id_maps_legacy_value() {
+        assert_eq!(normalize_provider_id(LEGACY_COREML_PROVIDER_ID), COREML_PROVIDER_ID);
+        assert_eq!(normalize_provider_id(WHISPER_OPENAI_PROVIDER_ID), WHISPER_OPENAI_PROVIDER_ID);
     }
 }

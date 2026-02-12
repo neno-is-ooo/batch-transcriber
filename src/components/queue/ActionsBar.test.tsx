@@ -12,7 +12,7 @@ function renderActionsBar(overrides: Partial<ActionsBarProps> = {}) {
     pendingCount: 0,
     processedCount: 0,
     totalCount: 0,
-    provider: "parakeet-coreml",
+    provider: "coreml-local",
     model: "v3",
     onStart: vi.fn(),
     onStop: vi.fn(),

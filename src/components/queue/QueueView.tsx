@@ -59,7 +59,7 @@ export function QueueView({
   pendingCount,
   processedCount,
   totalCount,
-  provider = "parakeet-coreml",
+  provider = "coreml-local",
   model = "v3",
   onStart = () => {
     // Intentionally optional while app wiring is incremental.

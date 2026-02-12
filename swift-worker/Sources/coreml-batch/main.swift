@@ -395,11 +395,11 @@ private enum Events {
 
 private func usage() -> String {
     return """
-    parakeet-batch
+    coreml-batch
 
     Usage:
-      parakeet-batch --capabilities
-      parakeet-batch (--input-dir <path> | --manifest <path>) [--output-dir <path>] [options]
+      coreml-batch --capabilities
+      coreml-batch (--input-dir <path> | --manifest <path>) [--output-dir <path>] [options]
 
     Required:
       --input-dir <path>         Directory containing audio files (directory mode).
@@ -408,7 +408,7 @@ private func usage() -> String {
                                  In manifest mode, defaults to manifest output_dir.
 
     Options:
-      --model-dir <path>         Parakeet model directory.
+      --model-dir <path>         CoreML model directory.
                                  Default: ~/Library/Application Support/FluidAudio/Models/parakeet-tdt-0.6b-v3-coreml
       --model-version <v2|v3>    Model version. Default: v3
       --output-format <txt|json|both>
@@ -940,7 +940,7 @@ private func isFfmpegAvailable() -> Bool {
 private func transcodeArchiveDirectory(config: Config) -> URL {
     config.outputDir
         .appendingPathComponent("_archive", isDirectory: true)
-        .appendingPathComponent("parakeet-transcode-cache", isDirectory: true)
+        .appendingPathComponent("coreml-transcode-cache", isDirectory: true)
 }
 
 private func reportsDirectory(config: Config) -> URL {
@@ -1105,7 +1105,7 @@ private func transcribeWithFallback(
 }
 
 @main
-private struct ParakeetBatchWorker {
+private struct CoreMLBatchWorker {
     static func main() async {
         let startedAt = Date()
 

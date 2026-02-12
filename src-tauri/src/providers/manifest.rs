@@ -224,14 +224,14 @@ mod tests {
     use super::*;
 
     fn test_sessions_dir() -> PathBuf {
-        std::env::temp_dir().join(format!("parakeet-manifest-tests-{}", Uuid::new_v4()))
+        std::env::temp_dir().join(format!("coreml-manifest-tests-{}", Uuid::new_v4()))
     }
 
     fn fixture_manifest(session_id: &str) -> SessionManifest {
         SessionManifest {
             session_id: session_id.to_string(),
             created_at: "2026-02-12T00:00:00.000Z".to_string(),
-            provider: "parakeet-coreml".to_string(),
+            provider: "coreml-local".to_string(),
             model: "v3".to_string(),
             output_dir: PathBuf::from("/tmp/transcripts"),
             settings: TranscriptionSettings {
@@ -269,7 +269,7 @@ mod tests {
             .expect("manifest should be valid json");
 
         assert_eq!(decoded.session_id, "session-a");
-        assert_eq!(decoded.provider, "parakeet-coreml");
+        assert_eq!(decoded.provider, "coreml-local");
         assert_eq!(decoded.files.len(), 1);
         assert_eq!(decoded.files[0].id, "file-1");
     }

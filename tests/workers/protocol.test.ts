@@ -44,7 +44,7 @@ describe("Worker NDJSON protocol validation", () => {
 
   it("accepts failure workflow stream with fatal and summary events", () => {
     const stream = [
-      "{\"event\":\"start\",\"timestamp\":\"2026-02-12T12:31:00Z\",\"session_id\":\"session-2\",\"provider\":\"parakeet-coreml\",\"model\":\"v3\"}",
+      "{\"event\":\"start\",\"timestamp\":\"2026-02-12T12:31:00Z\",\"session_id\":\"session-2\",\"provider\":\"coreml-local\",\"model\":\"v3\"}",
       "{\"event\":\"ffmpeg_status\",\"timestamp\":\"2026-02-12T12:31:01Z\",\"requested\":true,\"available\":true}",
       "{\"event\":\"scanned\",\"timestamp\":\"2026-02-12T12:31:02Z\",\"total\":1}",
       "{\"event\":\"file_failed\",\"timestamp\":\"2026-02-12T12:31:03Z\",\"index\":0,\"file\":\"/audio/bad.wav\",\"error\":\"decode failed\",\"attempts\":2}",

@@ -70,12 +70,12 @@ private func emit(_ event: String, fields: [String: Any] = [:]) {
 
 private func usage() -> String {
     """
-    parakeet-modelctl
+    coreml-modelctl
 
     Commands:
-      parakeet-modelctl list-installed
-      parakeet-modelctl install --model <v2|v3>
-      parakeet-modelctl resolve --model <v2|v3>
+      coreml-modelctl list-installed
+      coreml-modelctl install --model <v2|v3>
+      coreml-modelctl resolve --model <v2|v3>
     """
 }
 
@@ -170,7 +170,7 @@ private func installModel(args: ArraySlice<String>) async throws {
 }
 
 @main
-private struct ParakeetModelCtl {
+private struct CoreMLModelCtl {
     static func main() async {
         do {
             let args = Array(CommandLine.arguments.dropFirst())

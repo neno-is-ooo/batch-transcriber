@@ -63,12 +63,12 @@ describe("App settings panel", () => {
       if (command === "get_providers") {
         return Promise.resolve([
           {
-            id: "parakeet-coreml",
-            name: "Parakeet CoreML",
+            id: "coreml-local",
+            name: "CoreML Local",
             available: true,
             runtime: {
               type: "SwiftNative",
-              binaryPath: "/tmp/parakeet-batch",
+              binaryPath: "/tmp/coreml-batch",
               modelDir: "/tmp/models",
             },
           },

@@ -2,7 +2,7 @@
 
 Desktop batch transcription for macOS with multiple local engines:
 
-- Parakeet CoreML (Swift worker)
+- CoreML Local (Swift worker)
 - OpenAI Whisper (Python worker)
 - Faster-Whisper (Python worker)
 
@@ -65,14 +65,14 @@ npm run release:mac
 
 ## Provider Notes
 
-- Parakeet models are expected under:
+- CoreML model bundles are expected under:
   - `~/Library/Application Support/FluidAudio/Models/`
 - Whisper/Faster-Whisper Python environments are prepared via `scripts/build-workers.sh`.
 - Bundling scripts copy worker binaries/venvs into `src-tauri/resources` for distributable builds.
 
 ## Optional CLI Worker Run
 
-For direct worker execution (Parakeet worker path):
+For direct worker execution (CoreML worker path):
 
 ```bash
 ./scripts/bulk-transcribe.sh \

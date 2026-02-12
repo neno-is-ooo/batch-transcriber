@@ -3,8 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 SWIFT_WORKER_DIR="$ROOT_DIR/swift-worker"
-SWIFT_BATCH_BIN="$SWIFT_WORKER_DIR/.build/release/parakeet-batch"
-SWIFT_MODELCTL_BIN="$SWIFT_WORKER_DIR/.build/release/parakeet-modelctl"
+SWIFT_BATCH_BIN="$SWIFT_WORKER_DIR/.build/release/coreml-batch"
+SWIFT_MODELCTL_BIN="$SWIFT_WORKER_DIR/.build/release/coreml-modelctl"
 WHISPER_WORKER_DIR="$ROOT_DIR/workers/whisper-batch"
 FASTER_WHISPER_WORKER_DIR="$ROOT_DIR/workers/faster-whisper-batch"
 

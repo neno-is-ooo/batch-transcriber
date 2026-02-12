@@ -51,10 +51,12 @@ interface ToastState {
   tone: ToastTone;
 }
 
-const DEFAULT_PROVIDER = "parakeet-coreml";
+const DEFAULT_PROVIDER = "coreml-local";
+const LEGACY_PROVIDER = "parakeet-coreml";
 const DEFAULT_MODEL = "v3";
-const DEFAULT_OUTPUT_DIR = "/tmp/parakeet-transcripts";
-const SETTINGS_STORAGE_KEY = "parakeet.settings.v1";
+const DEFAULT_OUTPUT_DIR = "/tmp/batch-transcripts";
+const SETTINGS_STORAGE_KEY = "batch-transcriber.settings.v1";
+const LEGACY_SETTINGS_STORAGE_KEY = "parakeet.settings.v1";
 const APP_TITLE = "Batch Transcriber";
 const MENU_EVENT_FILES_SELECTED = "files-selected";
 const FILES_OPENED_EVENT = "files-opened";
@@ -94,6 +96,10 @@ function isOutputFormat(value: unknown): value is OutputFormatPreference {
   return value === "both" || value === "txt" || value === "json";
 }
 
+function normalizeProviderId(providerId: string): string {
+  return providerId === LEGACY_PROVIDER ? DEFAULT_PROVIDER : providerId;
+}
+
 function readStoredPreferences(): StoredPreferences | null {
   const storage = globalThis.localStorage;
   if (!storage) {
@@ -101,7 +107,8 @@ function readStoredPreferences(): StoredPreferences | null {
   }
 
   try {
-    const raw = storage.getItem(SETTINGS_STORAGE_KEY);
+    const raw =
+      storage.getItem(SETTINGS_STORAGE_KEY) ?? storage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
     if (!raw) {
       return null;
     }
@@ -138,8 +145,14 @@ function readStoredPreferences(): StoredPreferences | null {
       {}
     );
 
+    const normalizedProviderId = normalizeProviderId(providerId);
+    if (sanitizedModelMap[LEGACY_PROVIDER] && !sanitizedModelMap[DEFAULT_PROVIDER]) {
+      sanitizedModelMap[DEFAULT_PROVIDER] = sanitizedModelMap[LEGACY_PROVIDER];
+    }
+    delete sanitizedModelMap[LEGACY_PROVIDER];
+
     return {
-      providerId,
+      providerId: normalizedProviderId,
       modelByProvider: sanitizedModelMap,
       outputFormat,
       notificationsEnabled,
@@ -950,10 +963,11 @@ export default function App() {
 
   const handleReopenSession = useCallback(
     (session: SessionRecord) => {
-      setSelectedProvider(session.provider);
+      const normalizedProvider = normalizeProviderId(session.provider);
+      setSelectedProvider(normalizedProvider);
       setSelectedModelByProvider((current) => ({
         ...current,
-        [session.provider]: session.model,
+        [normalizedProvider]: session.model,
       }));
 
       const reopenedItems = session.files.map((file) => queueItemFromSessionFile(file));

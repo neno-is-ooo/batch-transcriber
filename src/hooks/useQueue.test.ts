@@ -160,7 +160,7 @@ describe("useQueue", () => {
     queue.handleEvent({
       event: "start",
       session_id: "session-01",
-      provider: "parakeet-coreml",
+      provider: "coreml-local",
       model: "v3",
     });
 
@@ -241,15 +241,15 @@ describe("useQueue", () => {
       file: "/audio/already-done.wav",
       reason: "outputs_exist",
       output: {
-        txt: "/tmp/parakeet-transcripts/already-done.wav.txt",
-        json: "/tmp/parakeet-transcripts/already-done.wav.json",
+        txt: "/tmp/batch-transcripts/already-done.wav.txt",
+        json: "/tmp/batch-transcripts/already-done.wav.json",
       },
     });
 
     const item = useQueue.getState().getItemByPath("/audio/already-done.wav");
     expect(item?.status).toBe("completed");
-    expect(item?.transcriptPath).toBe("/tmp/parakeet-transcripts/already-done.wav.txt");
-    expect(item?.jsonPath).toBe("/tmp/parakeet-transcripts/already-done.wav.json");
+    expect(item?.transcriptPath).toBe("/tmp/batch-transcripts/already-done.wav.txt");
+    expect(item?.jsonPath).toBe("/tmp/batch-transcripts/already-done.wav.json");
   });
 
   it("computes derived selectors", () => {

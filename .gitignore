@@ -13,6 +13,8 @@ dist-ssr
 *.local
 src-tauri/target
 swift-worker/.build
+src-tauri/resources/coreml-batch
+src-tauri/resources/coreml-modelctl
 src-tauri/resources/parakeet-batch
 src-tauri/resources/parakeet-modelctl
 src-tauri/resources/whisper-venv/

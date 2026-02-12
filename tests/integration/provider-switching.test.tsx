@@ -30,12 +30,12 @@ vi.mock("@tauri-apps/plugin-opener", () => ({
 
 const PROVIDERS_FIXTURE = [
   {
-    id: "parakeet-coreml",
-    name: "Parakeet CoreML",
+    id: "coreml-local",
+    name: "CoreML Local",
     available: true,
     runtime: {
       type: "SwiftNative",
-      binaryPath: "/tmp/parakeet-batch",
+      binaryPath: "/tmp/coreml-batch",
       modelDir: "/tmp/models",
     },
   },
@@ -120,7 +120,7 @@ describe("Provider switching integration", () => {
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("provider-select")).toHaveValue("parakeet-coreml");
+      expect(screen.getByTestId("provider-select")).toHaveValue("coreml-local");
       expect(screen.getByTestId("model-select")).toHaveValue("v3");
       expect(screen.getByText("provider-switch.wav")).toBeInTheDocument();
     });

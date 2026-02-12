@@ -30,12 +30,12 @@ vi.mock("@tauri-apps/plugin-opener", () => ({
 
 const PROVIDERS_FIXTURE = [
   {
-    id: "parakeet-coreml",
-    name: "Parakeet CoreML",
+    id: "coreml-local",
+    name: "CoreML Local",
     available: true,
     runtime: {
       type: "SwiftNative",
-      binaryPath: "/tmp/parakeet-batch",
+      binaryPath: "/tmp/coreml-batch",
       modelDir: "/tmp/models",
     },
   },
@@ -124,9 +124,9 @@ describe("Manifest bridge integration", () => {
       expect(invokeMock).toHaveBeenCalledWith(
         "start_transcription",
         expect.objectContaining({
-          provider: "parakeet-coreml",
+          provider: "coreml-local",
           model: "v3",
-          outputDir: "/tmp/parakeet-transcripts",
+          outputDir: "/tmp/batch-transcripts",
           items: [
             expect.objectContaining({
               path: "/audio/inputs/bridge.wav",

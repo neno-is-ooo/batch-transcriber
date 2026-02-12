@@ -11,7 +11,7 @@
     "test:unit": "vitest run src",
     "test:integration": "vitest run tests/integration",
     "test:workers": "vitest run tests/workers",
-    "test:workers:live:parakeet": "bash tests/workers/test-parakeet.sh",
+    "test:workers:live:coreml": "bash tests/workers/test-coreml.sh",
     "test:workers:live:whisper": "bash tests/workers/test-whisper.sh",
     "test:workers:live:faster-whisper": "bash tests/workers/test-faster-whisper.sh",
     "test:e2e": "node tests/e2e/run-e2e.mjs",

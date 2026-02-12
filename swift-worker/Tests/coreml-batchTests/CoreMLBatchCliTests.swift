@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-final class ParakeetBatchCliTests: XCTestCase {
+final class CoreMLBatchCliTests: XCTestCase {
     private struct CommandResult {
         let status: Int32
         let stdout: String
@@ -17,7 +17,7 @@ final class ParakeetBatchCliTests: XCTestCase {
 
     private func makeTempDirectory(_ name: String) throws -> URL {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("parakeet-batch-tests")
+            .appendingPathComponent("coreml-batch-tests")
             .appendingPathComponent("\(name)-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         return directory
@@ -39,7 +39,7 @@ final class ParakeetBatchCliTests: XCTestCase {
             "-c",
             "debug",
             "--product",
-            "parakeet-batch",
+            "coreml-batch",
         ]
         process.currentDirectoryURL = root
 
@@ -68,13 +68,13 @@ final class ParakeetBatchCliTests: XCTestCase {
 
         guard process.terminationStatus == 0 else {
             let stderr = String(decoding: stderrPipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-            XCTFail("Failed to build parakeet-batch test binary: \(stderr)")
+            XCTFail("Failed to build coreml-batch test binary: \(stderr)")
             return
         }
     }
 
     private func workerBinaryURL() throws -> URL {
-        if let explicit = ProcessInfo.processInfo.environment["PARAKEET_BATCH_BIN"],
+        if let explicit = ProcessInfo.processInfo.environment["COREML_BATCH_BIN"],
             FileManager.default.isExecutableFile(atPath: explicit)
         {
             return URL(fileURLWithPath: explicit)
@@ -82,12 +82,12 @@ final class ParakeetBatchCliTests: XCTestCase {
 
         let root = packageRoot()
         let candidates = [
-            root.appendingPathComponent(".build/debug/parakeet-batch"),
-            root.appendingPathComponent(".build/release/parakeet-batch"),
-            root.appendingPathComponent(".build/arm64-apple-macosx/debug/parakeet-batch"),
-            root.appendingPathComponent(".build/arm64-apple-macosx/release/parakeet-batch"),
-            root.appendingPathComponent(".build/x86_64-apple-macosx/debug/parakeet-batch"),
-            root.appendingPathComponent(".build/x86_64-apple-macosx/release/parakeet-batch"),
+            root.appendingPathComponent(".build/debug/coreml-batch"),
+            root.appendingPathComponent(".build/release/coreml-batch"),
+            root.appendingPathComponent(".build/arm64-apple-macosx/debug/coreml-batch"),
+            root.appendingPathComponent(".build/arm64-apple-macosx/release/coreml-batch"),
+            root.appendingPathComponent(".build/x86_64-apple-macosx/debug/coreml-batch"),
+            root.appendingPathComponent(".build/x86_64-apple-macosx/release/coreml-batch"),
         ]
 
         if let first = candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0.path) }) {
@@ -101,9 +101,9 @@ final class ParakeetBatchCliTests: XCTestCase {
         }
 
         throw NSError(
-            domain: "ParakeetBatchCliTests",
+            domain: "CoreMLBatchCliTests",
             code: 1,
-            userInfo: [NSLocalizedDescriptionKey: "Could not locate parakeet-batch executable"]
+            userInfo: [NSLocalizedDescriptionKey: "Could not locate coreml-batch executable"]
         )
     }
 
@@ -175,7 +175,7 @@ final class ParakeetBatchCliTests: XCTestCase {
             [
                 "session_id": "session-mixed",
                 "created_at": "2026-02-12T00:00:00.000Z",
-                "provider": "parakeet-coreml",
+                "provider": "coreml-local",
                 "model": "v3",
                 "output_dir": outputDir.path,
                 "settings": [
@@ -255,7 +255,7 @@ final class ParakeetBatchCliTests: XCTestCase {
             [
                 "session_id": "session-v2",
                 "created_at": "2026-02-12T00:00:00.000Z",
-                "provider": "parakeet-coreml",
+                "provider": "coreml-local",
                 "model": "v3",
                 "output_dir": outputDir.path,
                 "settings": [
@@ -314,7 +314,7 @@ final class ParakeetBatchCliTests: XCTestCase {
             [
                 "sessionId": "session-legacy",
                 "createdAt": "2026-02-12T00:00:00.000Z",
-                "provider": "parakeet-coreml",
+                "provider": "coreml-local",
                 "model": "v3",
                 "outputDir": outputDir.path,
                 "settings": [
@@ -370,7 +370,7 @@ final class ParakeetBatchCliTests: XCTestCase {
             [
                 "session_id": "session-invalid",
                 "created_at": "2026-02-12T00:00:00.000Z",
-                "provider": "parakeet-coreml",
+                "provider": "coreml-local",
                 "model": "v3",
                 "output_dir": outputDir.path,
                 "settings": [

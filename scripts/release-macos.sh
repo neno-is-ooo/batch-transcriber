@@ -149,10 +149,10 @@ if faster_whisper_venv="$(find_resource_path "faster-whisper-venv")"; then
 fi
 
 echo "[release] Signing nested app binaries..."
-if swift_worker="$(find_resource_path "parakeet-batch")"; then
+if swift_worker="$(find_resource_path "coreml-batch")"; then
   sign_binary "$swift_worker"
 fi
-if swift_modelctl="$(find_resource_path "parakeet-modelctl")"; then
+if swift_modelctl="$(find_resource_path "coreml-modelctl")"; then
   sign_binary "$swift_modelctl"
 fi
 

@@ -7,12 +7,12 @@ import { ProviderSelector, type ProviderSelectorProps } from "./ProviderSelector
 
 function createProvider(overrides: Partial<Provider>): Provider {
   return {
-    id: "parakeet-coreml",
-    name: "Parakeet CoreML",
+    id: "coreml-local",
+    name: "CoreML Local",
     available: true,
     runtime: {
       type: "SwiftNative",
-      binaryPath: "/tmp/parakeet-batch",
+      binaryPath: "/tmp/coreml-batch",
       modelDir: "/tmp/models",
     },
     ...overrides,
@@ -22,8 +22,8 @@ function createProvider(overrides: Partial<Provider>): Provider {
 function renderSelector(overrides: Partial<ProviderSelectorProps> = {}) {
   const providers: Provider[] = [
     createProvider({
-      id: "parakeet-coreml",
-      name: "Parakeet CoreML",
+      id: "coreml-local",
+      name: "CoreML Local",
       available: true,
       capabilities: {
         speedEstimate: 2.4,
@@ -64,7 +64,7 @@ function renderSelector(overrides: Partial<ProviderSelectorProps> = {}) {
   const props: ProviderSelectorProps = {
     providers,
     loading: false,
-    selectedProvider: "parakeet-coreml",
+    selectedProvider: "coreml-local",
     selectedModel: "v3",
     onProviderChange: vi.fn(),
     onModelChange: vi.fn(),
@@ -77,7 +77,7 @@ function renderSelector(overrides: Partial<ProviderSelectorProps> = {}) {
 }
 
 function ProviderSelectorHarness({ providers }: { providers: Provider[] }) {
-  const [selectedProvider, setSelectedProvider] = useState("parakeet-coreml");
+  const [selectedProvider, setSelectedProvider] = useState("coreml-local");
   const [selectedModel, setSelectedModel] = useState("v3");
 
   return (
@@ -106,7 +106,7 @@ describe("ProviderSelector", () => {
 
     const providerSelect = screen.getByTestId("provider-select");
     expect(providerSelect).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Parakeet CoreML" })).toBeEnabled();
+    expect(screen.getByRole("option", { name: "CoreML Local" })).toBeEnabled();
     expect(screen.getByRole("option", { name: "Whisper (OpenAI)" })).toBeEnabled();
     expect(screen.getByRole("option", { name: "Faster Whisper (Not Installed)" })).toBeEnabled();
 
@@ -146,8 +146,8 @@ describe("ProviderSelector", () => {
   it("updates model options when provider selection changes", () => {
     const providers: Provider[] = [
       createProvider({
-        id: "parakeet-coreml",
-        name: "Parakeet CoreML",
+        id: "coreml-local",
+        name: "CoreML Local",
         available: true,
       }),
       createProvider({

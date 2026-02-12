@@ -37,9 +37,9 @@ describe("build-workers.sh", () => {
 set -euo pipefail
 echo "swift:$PWD:$*" >> "$CALL_LOG"
 mkdir -p ".build/release"
-printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/parakeet-batch"
-printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/parakeet-modelctl"
-chmod +x ".build/release/parakeet-batch" ".build/release/parakeet-modelctl"
+printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/coreml-batch"
+printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/coreml-modelctl"
+chmod +x ".build/release/coreml-batch" ".build/release/coreml-modelctl"
 `
     );
 
@@ -67,8 +67,8 @@ fi
 
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
-    expect(existsSync(join(root, "swift-worker", ".build", "release", "parakeet-batch"))).toBe(true);
-    expect(existsSync(join(root, "swift-worker", ".build", "release", "parakeet-modelctl"))).toBe(true);
+    expect(existsSync(join(root, "swift-worker", ".build", "release", "coreml-batch"))).toBe(true);
+    expect(existsSync(join(root, "swift-worker", ".build", "release", "coreml-modelctl"))).toBe(true);
     expect(existsSync(join(root, "workers", "whisper-batch", ".venv", "bin", "python"))).toBe(true);
     expect(existsSync(join(root, "workers", "faster-whisper-batch", ".venv", "bin", "python"))).toBe(true);
 
@@ -94,9 +94,9 @@ fi
       `#!/usr/bin/env bash
 set -euo pipefail
 mkdir -p ".build/release"
-printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/parakeet-batch"
-printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/parakeet-modelctl"
-chmod +x ".build/release/parakeet-batch" ".build/release/parakeet-modelctl"
+printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/coreml-batch"
+printf '#!/usr/bin/env bash\nexit 0\n' > ".build/release/coreml-modelctl"
+chmod +x ".build/release/coreml-batch" ".build/release/coreml-modelctl"
 `
     );
 
@@ -130,11 +130,11 @@ describe("bundle-app.sh", () => {
     const root = makeTempRoot("bundle-app");
 
     makeExecutable(
-      join(root, "swift-worker", ".build", "release", "parakeet-batch"),
+      join(root, "swift-worker", ".build", "release", "coreml-batch"),
       "#!/usr/bin/env bash\nexit 0\n"
     );
     makeExecutable(
-      join(root, "swift-worker", ".build", "release", "parakeet-modelctl"),
+      join(root, "swift-worker", ".build", "release", "coreml-modelctl"),
       "#!/usr/bin/env bash\nexit 0\n"
     );
 
@@ -152,8 +152,8 @@ describe("bundle-app.sh", () => {
     });
 
     expect(result.status).toBe(0);
-    const bundledBatch = join(root, "src-tauri", "resources", "parakeet-batch");
-    const bundledModelctl = join(root, "src-tauri", "resources", "parakeet-modelctl");
+    const bundledBatch = join(root, "src-tauri", "resources", "coreml-batch");
+    const bundledModelctl = join(root, "src-tauri", "resources", "coreml-modelctl");
     const bundledWhisperPy = join(root, "src-tauri", "resources", "whisper-venv", "bin", "python");
 
     expect(existsSync(bundledBatch)).toBe(true);
@@ -212,15 +212,15 @@ if [[ "$1" == "run" && "$2" == "tauri" && "$3" == "build" ]]; then
   mkdir -p "$app/Contents/Resources/resources/faster-whisper-venv/bin"
   mkdir -p "$app/Contents/Resources/resources/faster-whisper-venv/lib"
   printf '#!/usr/bin/env bash\nexit 0\n' > "$app/Contents/MacOS/tauri-app"
-  printf '#!/usr/bin/env bash\nexit 0\n' > "$app/Contents/Resources/resources/parakeet-batch"
-  printf '#!/usr/bin/env bash\nexit 0\n' > "$app/Contents/Resources/resources/parakeet-modelctl"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$app/Contents/Resources/resources/coreml-batch"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$app/Contents/Resources/resources/coreml-modelctl"
   printf '#!/usr/bin/env bash\nexit 0\n' > "$app/Contents/Resources/resources/whisper-venv/bin/python"
   printf '#!/usr/bin/env bash\nexit 0\n' > "$app/Contents/Resources/resources/faster-whisper-venv/bin/python3"
   touch "$app/Contents/Resources/resources/whisper-venv/lib/libwhisper.so"
   touch "$app/Contents/Resources/resources/faster-whisper-venv/lib/libfaster.dylib"
   chmod +x "$app/Contents/MacOS/tauri-app"
-  chmod +x "$app/Contents/Resources/resources/parakeet-batch"
-  chmod +x "$app/Contents/Resources/resources/parakeet-modelctl"
+  chmod +x "$app/Contents/Resources/resources/coreml-batch"
+  chmod +x "$app/Contents/Resources/resources/coreml-modelctl"
   chmod +x "$app/Contents/Resources/resources/whisper-venv/bin/python"
   chmod +x "$app/Contents/Resources/resources/faster-whisper-venv/bin/python3"
 fi
@@ -280,7 +280,7 @@ touch "$output"
     const libIndex = signingCalls.findIndex((call) => call.includes("libwhisper.so"));
     const dylibIndex = signingCalls.findIndex((call) => call.includes("libfaster.dylib"));
     const venvBinIndex = signingCalls.findIndex((call) => call.includes("whisper-venv/bin/python"));
-    const swiftBinIndex = signingCalls.findIndex((call) => call.includes("resources/parakeet-batch"));
+    const swiftBinIndex = signingCalls.findIndex((call) => call.includes("resources/coreml-batch"));
     const appIndex = signingCalls.findIndex((call) => call.endsWith("Batch Transcriber.app"));
 
     expect(libIndex).toBeGreaterThanOrEqual(0);

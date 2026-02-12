@@ -7,7 +7,7 @@ function createSession(overrides: Partial<SessionRecord> = {}): SessionRecord {
   return {
     id: "session-a",
     createdAt: 1_707_696_000,
-    provider: "parakeet-coreml",
+    provider: "coreml-local",
     model: "v3",
     outputDir: "/tmp/out",
     manifestPath: "/tmp/sessions/session-a.json",
@@ -112,7 +112,7 @@ describe("HistoryView", () => {
     expect(screen.getByText("session-b")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Provider"), {
-      target: { value: "parakeet-coreml" },
+      target: { value: "coreml-local" },
     });
 
     expect(screen.queryByText("session-b")).not.toBeInTheDocument();

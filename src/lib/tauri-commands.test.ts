@@ -75,7 +75,7 @@ describe("tauri-commands", () => {
   });
 
   it("invokes get_providers without args", async () => {
-    const expected = [{ id: "parakeet-coreml", available: true }];
+    const expected = [{ id: "coreml-local", available: true }];
     invokeMock.mockResolvedValueOnce(expected);
 
     await expect(getProviders()).resolves.toEqual(expected);
@@ -153,7 +153,7 @@ describe("tauri-commands", () => {
             progress: 0,
           },
         ],
-        "parakeet-coreml",
+        "coreml-local",
         "v3",
         "/tmp/out",
         {
@@ -182,7 +182,7 @@ describe("tauri-commands", () => {
           progress: 0,
         },
       ],
-      provider: "parakeet-coreml",
+      provider: "coreml-local",
       model: "v3",
       outputDir: "/tmp/out",
       settings: {

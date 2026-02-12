@@ -23,7 +23,7 @@ describe("provider runtime guards", () => {
     const runtimes: ProviderRuntime[] = [
       {
         type: "SwiftNative",
-        binaryPath: "/usr/local/bin/parakeet-batch",
+        binaryPath: "/usr/local/bin/coreml-batch",
         modelDir: "/models/parakeet-v3",
       },
       {
@@ -50,7 +50,7 @@ describe("transcription event guards", () => {
       {
         event: "start",
         session_id: "session-123",
-        provider: "parakeet-coreml",
+        provider: "coreml-local",
         model: "v3",
       },
       { event: "scanned", total: 4 },
@@ -158,7 +158,7 @@ describe("transcription event guards", () => {
       JSON.stringify({
         event: "start",
         session_id: "session-abc",
-        provider: "parakeet-coreml",
+        provider: "coreml-local",
         model: "v2",
       })
     );
@@ -255,7 +255,7 @@ describe("Rust-aligned frontend types", () => {
     const catalogEntry: ModelCatalogEntry = {
       id: "parakeet-tdt-0.6b-v3-coreml",
       modelVersion: "v3",
-      displayName: "Parakeet TDT v3",
+      displayName: "CoreML TDT v3",
       description: "Multilingual model",
       sizeHint: "Large (~0.6B params)",
       recommendedFor: "Best overall accuracy",

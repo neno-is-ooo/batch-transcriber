@@ -710,13 +710,13 @@ mod tests {
     #[test]
     fn maps_swift_runtime_to_binary_command() {
         let runtime = ProviderRuntime::SwiftNative {
-            binary_path: PathBuf::from("/tmp/parakeet-batch"),
+            binary_path: PathBuf::from("/tmp/coreml-batch"),
             model_dir: PathBuf::from("/tmp/models/v3"),
         };
 
         let command = launch_command_for_runtime(&runtime).expect("swift runtime should map");
 
-        assert_eq!(command.program, "/tmp/parakeet-batch");
+        assert_eq!(command.program, "/tmp/coreml-batch");
         assert!(command.args.is_empty());
     }
 
@@ -746,7 +746,7 @@ mod tests {
     #[test]
     fn appends_manifest_flags_for_swift_runtime() {
         let runtime = ProviderRuntime::SwiftNative {
-            binary_path: PathBuf::from("/tmp/parakeet-batch"),
+            binary_path: PathBuf::from("/tmp/coreml-batch"),
             model_dir: PathBuf::from("/tmp/models/v2"),
         };
 
@@ -757,7 +757,7 @@ mod tests {
         )
         .expect("swift runtime should produce args");
 
-        assert_eq!(launch.program, "/tmp/parakeet-batch");
+        assert_eq!(launch.program, "/tmp/coreml-batch");
         assert!(launch.args.contains(&"--manifest".to_string()));
         assert!(launch
             .args

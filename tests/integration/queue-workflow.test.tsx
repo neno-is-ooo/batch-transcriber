@@ -30,12 +30,12 @@ vi.mock("@tauri-apps/plugin-opener", () => ({
 
 const PROVIDERS_FIXTURE = [
   {
-    id: "parakeet-coreml",
-    name: "Parakeet CoreML",
+    id: "coreml-local",
+    name: "CoreML Local",
     available: true,
     runtime: {
       type: "SwiftNative",
-      binaryPath: "/tmp/parakeet-batch",
+      binaryPath: "/tmp/coreml-batch",
       modelDir: "/tmp/models",
     },
   },

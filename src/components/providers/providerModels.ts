@@ -4,8 +4,11 @@ export interface ProviderModel {
   description: string;
 }
 
+const COREML_PROVIDER_ID = "coreml-local";
+const LEGACY_COREML_PROVIDER_ID = "parakeet-coreml";
+
 export const PROVIDER_MODELS: Record<string, ProviderModel[]> = {
-  "parakeet-coreml": [
+  "coreml-local": [
     {
       id: "v3",
       name: "v3 (Multilingual)",
@@ -59,7 +62,9 @@ export const PROVIDER_MODELS: Record<string, ProviderModel[]> = {
 };
 
 export function getModelsForProvider(providerId: string): ProviderModel[] {
-  return PROVIDER_MODELS[providerId] ?? [];
+  const normalizedProvider =
+    providerId === LEGACY_COREML_PROVIDER_ID ? COREML_PROVIDER_ID : providerId;
+  return PROVIDER_MODELS[normalizedProvider] ?? [];
 }
 
 export function resolveModelSelection(

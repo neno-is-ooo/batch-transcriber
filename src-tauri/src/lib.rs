@@ -33,7 +33,7 @@ const MENU_ID_STOP: &str = "stop";
 const MENU_ID_DOCS: &str = "docs";
 const MENU_ID_MODEL_MANAGER: &str = "model-manager";
 const MENU_ID_DIAGNOSTICS: &str = "diagnostics";
-const DOCUMENTATION_URL: &str = "https://github.com/neno/parakeet-stt-pipeline";
+const DOCUMENTATION_URL: &str = "https://github.com/neno-is-ooo/batch-transcriber";
 const SUPPORTED_AUDIO_EXTENSIONS: &[&str] =
     &["mp3", "wav", "m4a", "flac", "ogg", "aac", "aiff", "wma"];
 
@@ -186,7 +186,7 @@ const MANAGED_MODELS: [ManagedModelDef; 2] = [
         id: "parakeet-tdt-0.6b-v3-coreml",
         model_version: "v3",
         folder_name: "parakeet-tdt-0.6b-v3-coreml",
-        display_name: "Parakeet TDT v3",
+        display_name: "CoreML TDT v3",
         description: "Multilingual model (English + 25 European languages).",
         size_hint: "Large (~0.6B params)",
         recommended_for: "Best overall accuracy",
@@ -195,7 +195,7 @@ const MANAGED_MODELS: [ManagedModelDef; 2] = [
         id: "parakeet-tdt-0.6b-v2-coreml",
         model_version: "v2",
         folder_name: "parakeet-tdt-0.6b-v2-coreml",
-        display_name: "Parakeet TDT v2",
+        display_name: "CoreML TDT v2",
         description: "English-focused model with strong recall.",
         size_hint: "Large (~0.6B params)",
         recommended_for: "English-heavy workflows",
@@ -484,6 +484,20 @@ fn resolve_tool_binary(
     Ok(built)
 }
 
+fn resolve_tool_binary_with_legacy_fallback(
+    app: &AppHandle,
+    event_channel: &str,
+    primary_tool: &str,
+    legacy_tool: &str,
+) -> Result<(PathBuf, String), String> {
+    if let Ok(path) = resolve_tool_binary(app, event_channel, primary_tool) {
+        return Ok((path, primary_tool.to_string()));
+    }
+
+    let legacy_path = resolve_tool_binary(app, event_channel, legacy_tool)?;
+    Ok((legacy_path, legacy_tool.to_string()))
+}
+
 fn local_venv_path(venv_name: &str) -> Result<Option<PathBuf>, String> {
     let root = project_root()?;
     let path = match venv_name {
@@ -512,6 +526,14 @@ fn check_binary_exists(app: &AppHandle, tool_name: &str) -> bool {
     local_tool_binary_path(tool_name)
         .map(|path| path.exists())
         .unwrap_or(false)
+}
+
+fn check_binary_exists_with_legacy_fallback(
+    app: &AppHandle,
+    primary_tool: &str,
+    legacy_tool: &str,
+) -> bool {
+    check_binary_exists(app, primary_tool) || check_binary_exists(app, legacy_tool)
 }
 
 fn check_venv_exists(app: &AppHandle, venv_name: &str) -> bool {
@@ -943,7 +965,11 @@ fn run_startup_diagnostics(
 #[tauri::command]
 async fn health_check(app: AppHandle) -> Result<HealthStatus, String> {
     Ok(HealthStatus {
-        swift_ok: check_binary_exists(&app, "parakeet-batch"),
+        swift_ok: check_binary_exists_with_legacy_fallback(
+            &app,
+            providers::registry::SWIFT_TOOL_NAME,
+            providers::registry::LEGACY_SWIFT_TOOL_NAME,
+        ),
         whisper_ok: check_venv_exists(&app, "whisper-venv"),
         ffprobe_ok: command_succeeds("/usr/bin/env", &["ffprobe", "-version"]),
     })
@@ -976,7 +1002,12 @@ async fn install_model(
 ) -> Result<InstallModelResult, String> {
     let model = model_by_version(&request.model_version)?;
     let model_dir = model_dir_for(model)?;
-    let modelctl_bin = resolve_tool_binary(&app, MODEL_EVENT, "parakeet-modelctl")?;
+    let (modelctl_bin, modelctl_tool) = resolve_tool_binary_with_legacy_fallback(
+        &app,
+        MODEL_EVENT,
+        providers::registry::SWIFT_MODELCTL_TOOL_NAME,
+        providers::registry::LEGACY_SWIFT_MODELCTL_TOOL_NAME,
+    )?;
 
     let args = vec![
         "install".to_string(),
@@ -988,7 +1019,7 @@ async fn install_model(
         MODEL_EVENT,
         serde_json::json!({
             "event": "install_command_started",
-            "tool": "parakeet-modelctl",
+            "tool": modelctl_tool,
             "binary": modelctl_bin,
             "args": args,
         }),
@@ -1093,7 +1124,12 @@ async fn run_batch_transcription(
     app: AppHandle,
     request: RunBatchRequest,
 ) -> Result<BatchSummary, String> {
-    let worker_bin = resolve_tool_binary(&app, BATCH_EVENT, "parakeet-batch")?;
+    let (worker_bin, _) = resolve_tool_binary_with_legacy_fallback(
+        &app,
+        BATCH_EVENT,
+        providers::registry::SWIFT_TOOL_NAME,
+        providers::registry::LEGACY_SWIFT_TOOL_NAME,
+    )?;
 
     if !Path::new(&request.input_dir).exists() {
         return Err(format!("Input directory not found: {}", request.input_dir));

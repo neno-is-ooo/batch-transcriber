@@ -39,12 +39,12 @@ vi.mock("@tauri-apps/plugin-opener", () => ({
 
 const PROVIDERS_FIXTURE = [
   {
-    id: "parakeet-coreml",
-    name: "Parakeet CoreML",
+    id: "coreml-local",
+    name: "CoreML Local",
     available: true,
     runtime: {
       type: "SwiftNative",
-      binaryPath: "/tmp/parakeet-batch",
+      binaryPath: "/tmp/coreml-batch",
       modelDir: "/tmp/models",
     },
     capabilities: {
@@ -173,9 +173,9 @@ describe("App", () => {
       expect(invokeMock).toHaveBeenCalledWith(
         "start_transcription",
         expect.objectContaining({
-          provider: "parakeet-coreml",
+          provider: "coreml-local",
           model: "v3",
-          outputDir: "/tmp/parakeet-transcripts",
+          outputDir: "/tmp/batch-transcripts",
           settings: expect.objectContaining({
             outputFormat: "both",
             notificationsEnabled: true,
@@ -613,9 +613,9 @@ describe("App", () => {
       expect(invokeMock).toHaveBeenCalledWith(
         "start_transcription",
         expect.objectContaining({
-          provider: "parakeet-coreml",
+          provider: "coreml-local",
           model: "v3",
-          outputDir: "/tmp/parakeet-transcripts",
+          outputDir: "/tmp/batch-transcripts",
         })
       );
     });
@@ -797,7 +797,7 @@ describe("App", () => {
     useQueue.getState().updateItem(item.id, {
       status: "completed",
       progress: 100,
-      transcriptPath: "/tmp/parakeet-transcripts/export.txt",
+      transcriptPath: "/tmp/batch-transcripts/export.txt",
     });
 
     render(<App />);
@@ -839,7 +839,7 @@ describe("App", () => {
           {
             id: "session-h1",
             createdAt: 1_707_696_000,
-            provider: "parakeet-coreml",
+            provider: "coreml-local",
             model: "v3",
             outputDir: "/tmp/out",
             manifestPath: "/tmp/sessions/session-h1.json",
